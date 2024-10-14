@@ -1,0 +1,82 @@
+// Custom variables
+$primary: #1e88e5;
+$secondary: #ff4081;
+$dark: #333333;
+$light: #f8f9fa;
+
+// Import Bootstrap
+@import "~bootstrap/scss/bootstrap";
+
+// Custom styles
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+.home-page {
+  .navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-brand {
+    font-weight: 700;
+    color: $primary !important;
+  }
+
+  .btn-primary {
+    width: 120px;
+    background-color: $primary;
+    border-color: $primary;
+    color: $light;
+    &:hover {
+      background-color: darken($primary, 10%);
+      border-color: darken($primary, 10%);
+    }
+  }
+
+  .btn-outline-primary {
+    width: 120px;
+    color: $primary;
+    border-color: $primary;
+    &:hover {
+      background-color: $primary;
+      color: $light;
+    }
+  }
+
+  .card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  footer {
+    background-color: $dark;
+    color: $light;
+    a {
+      color: $light;
+      text-decoration: none;
+      &:hover {
+        color: $secondary;
+      }
+    }
+  }
+
+  // Promotion card
+  .promotion-card {
+    background: linear-gradient(45deg, $primary, lighten($primary, 15%));
+    border: none;
+    .btn-light {
+      color: $primary;
+      &:hover {
+        background-color: darken($light, 10%);
+      }
+    }
+  }
+}

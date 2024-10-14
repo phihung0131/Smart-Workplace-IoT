@@ -1,0 +1,17 @@
+# Bỏ qua các tệp và thư mục cụ thể
+known_faces_embeddings.pkl
+output.mp3
+yolov5s.pt
+
+# Bỏ qua thư mục conda
+.conda
+
+# Bỏ qua thư mục __pycache__ và các tệp biên dịch Python
+__pycache__/
+modules/__pycache__/
+
+# Bỏ qua các tệp tạm thời của hệ điều hành
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

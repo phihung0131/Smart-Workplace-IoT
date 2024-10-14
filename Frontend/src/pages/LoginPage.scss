@@ -1,0 +1,63 @@
+$primary: #1e88e5;
+$secondary: #ff4081;
+$dark: #333333;
+$light: #f8f9fa;
+
+.login-page {
+  background-color: $light;
+  background-image: url("https://banghieuviet.org/wp-content/uploads/2023/08/background-xanh-duong-dep-nhat.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+
+  .login-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  h2 {
+    color: $primary;
+  }
+
+  .form-label {
+    color: $dark;
+  }
+
+  .form-control {
+    background-color: $light;
+    border-color: $primary;
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+    }
+  }
+
+  .btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+
+    &:hover, &:focus {
+      background-color: darken($primary, 10%);
+      border-color: darken($primary, 10%);
+    }
+  }
+
+  .forgot-password, a {
+    text-decoration: none;
+
+    &:hover {
+      color: darken($primary, 10%);
+      text-decoration: underline;
+    }
+  }
+
+  .form-check-input:checked {
+    background-color: $primary;
+    border-color: $primary;
+  }
+}
