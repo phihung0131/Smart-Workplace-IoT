@@ -3,7 +3,9 @@ const http = require("http");
 const cors = require("cors");
 require("dotenv").config();
 const dbConnection = require("./src/config/database");
-const adafruitHandle = require("./src/services/adafruitHandler");
+const {
+  initializeAdafruitHandlers,
+} = require("./src/services/adafruitHandler");
 const routes = require("./src/routes");
 const passport = require("./src/config/passport");
 const { setupSocket } = require("./src/services/socket.js"); // Import setupSocket
@@ -40,7 +42,7 @@ app.use("/api/v1", routes);
 dbConnection.connect();
 
 // Kết nối adafruit
-adafruitHandle();
+initializeAdafruitHandlers();
 
 // Start the server
 server.listen(port, hostname, () => {

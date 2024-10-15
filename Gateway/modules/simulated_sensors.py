@@ -11,9 +11,10 @@ class SimulatedSensors:
 
     def read_sensors(self):
         # Mô phỏng đọc dữ liệu cảm biến
-        self.temperature += random.uniform(-0.5, 0.5)
-        self.humidity += random.uniform(-1, 1)
-        self.light += random.uniform(-10, 10)
+        self.temperature += random.uniform(-2, 2)  # Nhiệt độ dao động từ -2 đến 2
+        self.humidity += random.uniform(-2, 2)      # Độ ẩm dao động từ -2 đến 2
+        self.light += random.uniform(-20, 20)       # Ánh sáng dao động từ -20 đến 20
+
 
         # return {
         #     'temperature': round(self.temperature, 1),
@@ -22,9 +23,9 @@ class SimulatedSensors:
         # }
 
         return {
-            'temperature': 29,
+            'temperature': round(self.temperature, 1),
             'humidity': round(self.humidity, 1),
-            'light': 290
+            'light': round(self.light, 1)
         }
 
     def control_led(self, state):

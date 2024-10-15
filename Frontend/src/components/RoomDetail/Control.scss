@@ -1,0 +1,85 @@
+// SmartHomeControls.scss
+
+$primary-color: #007bff;
+$danger-color: #dc3545;
+$light-color: #f8f9fa;
+$text-color: #333;
+$border-radius: 10px;
+$transition-speed: 0.3s;
+
+.smart-home-controls {
+  padding: 20px;
+  max-width: 600px; // Limit the width for larger screens
+  margin: 0 auto; // Center the container
+
+  .row {
+    --bs-gutter-x: 1.5rem; // Adjust gutter for spacing between cards
+    --bs-gutter-y: 1.5rem;
+  }
+
+  .control-item {
+    border-radius: $border-radius;
+    transition: all $transition-speed ease;
+    height: 100%;
+
+    &.on {
+      background-color: lighten($primary-color, 40%);
+    }
+
+    &.off {
+      background-color: $light-color;
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1.5rem; // Increase padding for better spacing
+    }
+
+    .icon-wrapper {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-weight: bold;
+      color: $text-color;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      flex: 1;
+      border-radius: $border-radius;
+      transition: all $transition-speed ease;
+
+      &:first-child {
+        margin-right: 5px;
+      }
+
+      &:last-child {
+        margin-left: 5px;
+      }
+
+      &.active {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 575.98px) {
+  .smart-home-controls {
+    .control-item {
+      margin-bottom: 1rem;
+    }
+  }
+}

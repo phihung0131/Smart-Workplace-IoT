@@ -1,10 +1,12 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
+
 import Dashboard from "./Dashboard";
 import CircularGauge from "./CircularGauge";
+// import apiService from "../../services/api";
 import "./Parameter.scss";
 
-const Parameter = () => {
+const Parameter = (props) => {
   const chartData = [
     { time: "1h", temperature: 20, humidity: 50, light: 65 },
     { time: "2h", temperature: 32, humidity: 55, light: 70 },
@@ -23,13 +25,28 @@ const Parameter = () => {
       </Row>
       <Row>
         <Col md={4} className="mb-3 mb-md-0">
-          <CircularGauge value={300} unit="Lux" title="Ánh sáng" max={500} />
+          <CircularGauge
+            value={props.light}
+            unit="Lux"
+            title="Ánh sáng"
+            max={1000}
+          />
         </Col>
         <Col md={4} className="mb-3 mb-md-0">
-          <CircularGauge value={30} unit="Độ C" title="Nhiệt độ" max={40} />
+          <CircularGauge
+            value={props.temperature}
+            unit="Độ C"
+            title="Nhiệt độ"
+            max={50}
+          />
         </Col>
         <Col md={4}>
-          <CircularGauge value={15} unit="%" title="Độ ẩm" max={100} />
+          <CircularGauge
+            value={props.humidity}
+            unit="%"
+            title="Độ ẩm"
+            max={100}
+          />
         </Col>
       </Row>
     </Container>

@@ -21,7 +21,7 @@ const Header = () => {
   };
   if (!authState.isAuthenticated) {
     return (
-      <nav className="navbar navbar-expand-lg navbar-light bg-white">
+      <nav className="navbar navbar-expand-lg navbar-light bg-white ">
         <div className="container">
           <Link className="navbar-brand fs-4" to="/">
             SmartWork
@@ -53,7 +53,7 @@ const Header = () => {
   }
 
   return (
-    <Navbar bg="white" expand="lg" className="shadow-sm">
+    <Navbar bg="white" expand="lg" className="shadow-sm sticky-top">
       <Container>
         <Link className="navbar-brand fs-4" to="/">
           SmartWork

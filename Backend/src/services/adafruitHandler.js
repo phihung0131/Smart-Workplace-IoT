@@ -75,17 +75,25 @@ class AdafruitHandler {
   async updateSensorData(room, sensor, value) {
     const update = {};
     update[sensor] = value;
+    const result = await SensorData.create({
+      room: room._id,
+      type: sensor,
+      value,
+    });
 
-    const result = await SensorData.findOneAndUpdate(
-      { room: room._id },
-      update,
-      {
-        upsert: true,
-        new: true,
-      }
-    );
-
-    // console.log("Sensors");
+    notifyAllClients("room-sensors-update", {
+      sensor: result,
+    });
+    // console.log(sensor);
+    // const result = await SensorData.findOneAndUpdate(
+    //   { room: room._id },
+    //   update,
+    //   {
+    //     upsert: true,
+    //     new: true,
+    //   }
+    // );
+    // // console.log(result);
   }
 
   async updateDeviceStatus(room, deviceType, status) {
@@ -94,13 +102,16 @@ class AdafruitHandler {
       { activity: status },
       { upsert: true, new: true }
     );
-    // console.log(result);
+    console.log(result);
+    notifyAllClients("room-device-update", {
+      device: result,
+    });
   }
 
   async updateUserHistory(room, userInfo) {
     const regex = /(.+) được gán cho (.+) lúc (.+)/;
     const regexRevoke = /Thu hồi quyền điều khiển từ (.+) lúc (.+)/;
-    console.log(userInfo);
+    // console.log(userInfo);
     let match = userInfo.match(regex);
     if (match) {
       const [, , username, timestamp] = match;
@@ -130,7 +141,7 @@ class AdafruitHandler {
         await room.save();
       }
     }
-    
+
     notifyAllClients("room-status-update", {
       roomId: room._id,
       currentUser: room.currentUser,
@@ -146,6 +157,59 @@ async function initializeAdafruitHandlers() {
   });
 }
 
+// Public
+const controlRoomDevice = async (roomId, device, activity) => {
+  try {
+    // Tìm phòng dựa trên roomId
+    const room = await Room.findById(roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    // Kết nối với Adafruit IO
+    const client = mqtt.connect("mqtts://io.adafruit.com", {
+      username: room.adaName, // Tên tài khoản Adafruit
+      password: room.adaKey, // Key từ Adafruit
+    });
+
+    return new Promise((resolve, reject) => {
+      client.on("connect", () => {
+        console.log("Connected to Adafruit IO");
+
+        const feedName = `${room.adaName}/feeds/${device}`; // Định nghĩa tên feed dựa trên room và device
+        console.log(`Publishing to feed: ${feedName}`);
+
+        // Publish activity (on/off hoặc một giá trị khác) lên feed của thiết bị
+        client.publish(feedName, activity, (err) => {
+          if (err) {
+            console.error("Error publishing to Adafruit:", err);
+            client.end(); // Ngắt kết nối trong trường hợp lỗi
+            reject(err);
+          } else {
+            console.log(`Successfully published ${activity} to ${feedName}`);
+
+            // Ngắt kết nối sau khi publish xong
+            client.end(false, () => {
+              console.log("Disconnected from Adafruit IO");
+              resolve();
+            });
+          }
+        });
+      });
+
+      // Xử lý lỗi khi kết nối thất bại
+      client.on("error", (err) => {
+        console.error("MQTT connection error:", err);
+        client.end(); // Đảm bảo ngắt kết nối trong trường hợp có lỗi
+        reject(err);
+      });
+    });
+  } catch (error) {
+    console.error("Error controlling device:", error);
+    throw error; // Ném lỗi để xử lý phía trên nếu cần
+  }
+};
+
 // initializeAdafruitHandlers().catch(console.error);
 
-module.exports = initializeAdafruitHandlers;
+module.exports = { initializeAdafruitHandlers, controlRoomDevice };
