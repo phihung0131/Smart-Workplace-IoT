@@ -1,0 +1,45 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+.room-detail-page {
+  .room-info {
+    background-color: $white;
+    border: none;
+    border-radius: $border-radius-lg;
+
+    .room-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: $primary;
+    }
+
+    .room-nav {
+      @include media-breakpoint-down(md) {
+        margin-top: 1rem;
+        justify-content: flex-start !important;
+      }
+
+      .btn {
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+
+  .parameter {
+    .card {
+      height: 100%;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+}

@@ -133,11 +133,11 @@ class CameraHandler:
                 self.adafruit_client.publish('user', text) 
 
             self.last_detection_time = current_time
-        elif self.current_controller and (current_time - self.last_detection_time > 60):
+        elif self.current_controller and (current_time - self.last_detection_time > 5):
             text = f"Thu hồi quyền điều khiển từ {self.current_controller} lúc {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             print(text)
             self.adafruit_client.publish('user', text) 
-            time.sleep(5)
+            time.sleep(2)
             self.adafruit_client.publish('user', 'none') 
 
             self.current_controller = None

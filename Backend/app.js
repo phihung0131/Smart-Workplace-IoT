@@ -1,13 +1,15 @@
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 require("dotenv").config();
 const dbConnection = require("./src/config/database");
 const adafruitHandle = require("./src/services/adafruitHandler");
 const routes = require("./src/routes");
 const passport = require("./src/config/passport");
-
+const { setupSocket } = require("./src/services/socket.js"); // Import setupSocket
 
 const app = express();
+const server = http.createServer(app);
 
 const hostname = process.env.HOSTNAME;
 const port = process.env.PORT || 8081;
@@ -19,6 +21,9 @@ let corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Thiết lập Socket.IO
+setupSocket(server); // Khởi tạo io từ server
 
 // Middleware: Parse requests with JSON payload
 app.use(express.json());
@@ -34,9 +39,10 @@ app.use("/api/v1", routes);
 // Connect to the database
 dbConnection.connect();
 
+// Kết nối adafruit
 adafruitHandle();
 
 // Start the server
-app.listen(port, hostname, () => {
+server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });

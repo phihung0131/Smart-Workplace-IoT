@@ -1,32 +1,58 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import "./LoginPage.scss";
 import apiService from "../services/api";
 import showToast from "../helper/showToast";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess } from "../redux/actions/authAction";
+import { Navigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberPassword, setRememberPassword] = useState(false);
 
   const fetchUsers = async (credentials) => {
     try {
+      // Gọi API login
       const response = await apiService.login(credentials);
+
+      // Hiển thị thông báo thành công
       showToast.success(response?.data?.message);
-      console.log(response.data);
+
+      // Dispatch login thành công để lưu thông tin người dùng vào Redux store
+      dispatch(loginSuccess(response?.data?.data?.user));
+
+      // Đợi 3 giây trước khi chuyển hướng sang trang "/home"
+      setTimeout(() => {
+        navigate("/home");
+      }, 2000); // 3000ms tương đương 3 giây
     } catch (error) {
+      // Hiển thị thông báo lỗi nếu có vấn đề xảy ra
       showToast.error(error?.response?.data);
-      console.log(">>>Loi: ", error);
+      console.log(">>>Lỗi: ", error);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const credentials = { username, password };
+
+    // Gọi hàm fetchUsers để xử lý login
     fetchUsers(credentials);
   };
 
+  const authState = useSelector((state) => state.auth); // Lấy trạng thái từ redux store
+
+  // Nếu người dùng chưa đăng nhập, điều hướng về trang /login
+  if (authState.isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+  
   return (
     <div className="login-page">
       <Container>

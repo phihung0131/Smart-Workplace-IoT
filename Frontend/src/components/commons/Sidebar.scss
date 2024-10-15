@@ -1,0 +1,87 @@
+// Sidebar.scss
+
+$sidebar-width: 250px;
+$sidebar-bg: #2c3e50;
+$sidebar-color: #ecf0f1;
+$sidebar-hover-bg: #34495e;
+$transition-speed: 0.3s;
+
+.sidebar {
+  width: $sidebar-width;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: -$sidebar-width;
+  background-color: $sidebar-bg;
+  transition: left $transition-speed ease-in-out;
+  padding-top: 60px;
+  z-index: 1000;
+
+  &.open {
+    left: 0;
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-link {
+    color: $sidebar-color;
+    padding: 15px 20px;
+    transition: background-color $transition-speed ease;
+
+    &:hover {
+      background-color: $sidebar-hover-bg;
+    }
+
+    svg {
+      margin-right: 10px;
+      font-size: 1.2em;
+    }
+  }
+}
+
+// Responsive styles
+@media (min-width: 768px) {
+  .sidebar {
+    left: 0;
+  }
+
+  .content {
+    margin-left: $sidebar-width;
+  }
+}
+
+// Toggle button styles
+.btn-toggle-sidebar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
+  background-color: $sidebar-bg;
+  border: none;
+  color: $sidebar-color;
+  padding: 10px;
+  border-radius: 5px;
+  
+  &:hover {
+    background-color: $sidebar-hover-bg;
+  }
+}
+
+// Animation for menu items
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.sidebar .nav-item {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+
+  @for $i from 1 through 4 {
+    &:nth-child(#{$i}) {
+      animation-delay: $i * 0.1s;
+    }
+  }
+}

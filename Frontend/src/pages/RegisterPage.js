@@ -1,18 +1,56 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import "./RegisterPage.scss";
+import apiService from "../services/api";
+import showToast from "../helper/showToast";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess } from "../redux/actions/authAction";
+import { Navigate } from "react-router-dom";
 
 const RegisterPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const fetchUsers = async (userInfos) => {
+    try {
+      // Gọi API login
+      const response = await apiService.register(userInfos);
+      // Hiển thị thông báo thành công
+      showToast.success(response?.data?.message);
+
+      // Dispatch login thành công để lưu thông tin người dùng vào Redux store
+      dispatch(loginSuccess(response?.data?.data?.user));
+
+      // Đợi 3 giây trước khi chuyển hướng sang trang "/home"
+      setTimeout(() => {
+        navigate("/home");
+      }, 2000); // 3000ms tương đương 3 giây
+    } catch (error) {
+      // Hiển thị thông báo lỗi nếu có vấn đề xảy ra
+      showToast.error(error?.response?.data?.data?.error);
+      console.log(">>>Lỗi: ", error);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Xử lý logic đăng ký ở đây
-    console.log("Đăng ký với:", { name, username, password });
+    const userInfos = { name, username, password };
+
+    // Gọi hàm fetchUsers để xử lý login
+    fetchUsers(userInfos);
   };
+
+  const authState = useSelector((state) => state.auth); // Lấy trạng thái từ redux store
+
+  // Nếu người dùng chưa đăng nhập, điều hướng về trang /login
+  if (authState.isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <div className="register-page">

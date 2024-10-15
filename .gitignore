@@ -5,3 +5,4 @@ Gateway/.conda
 Gateway/known_faces_embeddings.pkl
 Gateway/output.mp3
 Gateway/yolov5s.pt
+Gateway/known_faces/phihung0131

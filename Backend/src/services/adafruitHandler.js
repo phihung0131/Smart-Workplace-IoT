@@ -3,6 +3,7 @@ const Room = require("../models/Room");
 const SensorData = require("../models/SensorData");
 const Device = require("../models/Device");
 const History = require("../models/History");
+const { notifyAllClients } = require("./socket");
 
 class AdafruitHandler {
   constructor(adaName, adaKey) {
@@ -84,7 +85,7 @@ class AdafruitHandler {
       }
     );
 
-    console.log("Sensors");
+    // console.log("Sensors");
   }
 
   async updateDeviceStatus(room, deviceType, status) {
@@ -93,7 +94,7 @@ class AdafruitHandler {
       { activity: status },
       { upsert: true, new: true }
     );
-    console.log(result);
+    // console.log(result);
   }
 
   async updateUserHistory(room, userInfo) {
@@ -108,6 +109,8 @@ class AdafruitHandler {
         user: username,
         status: "in",
       });
+      room.currentUser = username;
+      await room.save();
     } else {
       match = userInfo.match(regexRevoke);
       if (match) {
@@ -123,8 +126,15 @@ class AdafruitHandler {
           user: "none",
           status: "out",
         });
+        room.currentUser = "none";
+        await room.save();
       }
     }
+    
+    notifyAllClients("room-status-update", {
+      roomId: room._id,
+      currentUser: room.currentUser,
+    });
   }
 }
 

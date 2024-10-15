@@ -1,0 +1,65 @@
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins';
+
+.circular-gauge-card {
+  perspective: 1000px;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.01);
+  }
+}
+
+.circular-gauge {
+  text-align: center;
+  font-family: $font-family-base;
+  background-color: $white;
+  border-radius: $border-radius-lg;
+  padding: $spacer * 1.5;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+
+  &:hover {
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    // transform: rotateX(5deg) rotateY(5deg);
+  }
+
+  &__title {
+    margin-bottom: $spacer;
+    font-size: $h4-font-size;
+    font-weight: $font-weight-bold;
+    color: $gray-800;
+  }
+
+  &__container {
+    position: relative;
+    display: inline-block;
+  }
+
+  &__svg {
+    transform: rotate(-90deg);
+  }
+
+  &__background {
+    fill: none;
+    stroke: $gray-200;
+  }
+
+  &__progress {
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease-in-out;
+  }
+
+  &__value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: $h5-font-size;
+    font-weight: $font-weight-bold;
+    color: $gray-700;
+  }
+}

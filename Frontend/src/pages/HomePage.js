@@ -1,42 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.scss";
+import Header from "../components/commons/Header";
+// import { useSelector } from "react-redux";
 
 const HomePage = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // const authState = useSelector((state) => state.auth); // Lấy dữ liệu từ Redux store
 
   return (
     <div className="home-page">
       <div className="bg-light min-vh-100 d-flex flex-column">
-        <nav className="navbar navbar-expand-lg navbar-light bg-white">
-          <div className="container">
-            <a className="navbar-brand fs-4" href="/">
-              SmartWork
-            </a>
-            <button
-              className="navbar-toggler"
-              type="button"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div
-              className={`collapse navbar-collapse ${isMenuOpen ? "show" : ""}`}
-            >
-              <div className="navbar-nav ms-auto">
-                <Link to="/login">
-                  <button className="btn btn-outline-primary me-2">
-                    Đăng nhập
-                  </button>
-                </Link>
-                <Link to="/register">
-                  <button className="btn btn-primary">Đăng ký</button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
-
+        <Header />
         <main className="flex-grow-1">
           <div className="container py-5">
             <div className="text-center mb-5">
@@ -57,7 +31,11 @@ const HomePage = () => {
                   Khám phá các môi trường làm việc hiệu quả và biến đổi không
                   gian làm việc của bạn trong mùa thu này.
                 </p>
-                <button className="btn btn-light btn-lg">Tìm hiểu thêm</button>
+                <Link to="/register">
+                  <button className="btn btn-light btn-lg">
+                    Tìm hiểu thêm
+                  </button>
+                </Link>
               </div>
             </div>
 
@@ -82,7 +60,6 @@ const HomePage = () => {
             </div>
           </div>
         </main>
-
         <footer className="py-4 mt-5">
           <div className="container">
             <div className="row">
@@ -95,13 +72,13 @@ const HomePage = () => {
               <div className="col-md-6">
                 <ul className="list-unstyled d-flex justify-content-md-end mb-0">
                   <li className="me-3">
-                    <a href="#">Chính sách bảo mật</a>
+                    <Link to="/">Chính sách bảo mật</Link>
                   </li>
                   <li className="me-3">
-                    <a href="#">Điều khoản dịch vụ</a>
+                    <Link to="/">Điều khoản dịch vụ</Link>
                   </li>
                   <li>
-                    <a href="#">Liên hệ</a>
+                    <Link to="/">Liên hệ</Link>
                   </li>
                 </ul>
               </div>

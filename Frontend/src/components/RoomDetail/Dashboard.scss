@@ -1,0 +1,54 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+.dashboard-card {
+  background-color: $white;
+  border-radius: $border-radius-lg;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-header {
+    background-color: $primary;
+    color: $white;
+    border-top-left-radius: $border-radius-lg;
+    border-top-right-radius: $border-radius-lg;
+    padding: $spacer;
+
+    h2 {
+      margin: 0;
+      font-size: $h4-font-size;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  .card-body {
+    padding: $spacer * 1.5;
+  }
+}
+
+// Custom styles for Recharts
+.recharts-default-tooltip {
+  background-color: rgba($dark, 0.8) !important;
+  border: none !important;
+  border-radius: $border-radius;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .recharts-tooltip-label {
+    color: $white !important;
+  }
+
+  .recharts-tooltip-item {
+    color: $white !important;
+  }
+}
+
+.recharts-legend-item-text {
+  color: $body-color !important;
+}
+

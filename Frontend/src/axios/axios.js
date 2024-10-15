@@ -1,20 +1,21 @@
-import axios from 'axios';
-
+import axios from "axios";
+import { store } from "../redux/store";
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://api.example.com',
+  baseURL: process.env.REACT_APP_API_URL || "https://api.example.com",
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 // Interceptor cho request
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = store.getState().auth.token;
+    // console.log(token);
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },

@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 
 const RoomSchema = new mongoose.Schema(
   {
-    nane: String,
+    name: String,
     adaName: String,
     adaKey: String,
+    currentUser: String,
   },
   { timestamps: true }
 );

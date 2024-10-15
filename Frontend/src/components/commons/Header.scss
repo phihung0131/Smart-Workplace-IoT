@@ -1,0 +1,17 @@
+// Custom variables
+$primary: #1e88e5;
+$secondary: #ff4081;
+$dark: #333333;
+$light: #f8f9fa;
+
+// Import Bootstrap
+@import "~bootstrap/scss/bootstrap";
+
+.navbar-brand {
+  font-weight: 700;
+  color: $primary !important;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
