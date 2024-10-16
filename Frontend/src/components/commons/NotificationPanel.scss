@@ -1,0 +1,24 @@
+.notification-panel {
+  max-height: 400px;
+  overflow-y: auto;
+
+  .card-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+  }
+
+  .notification-item {
+    .notification-title {
+      font-weight: bold;
+    }
+
+    .notification-content {
+      font-size: 0.9rem;
+    }
+
+    .notification-time {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+  }
+}

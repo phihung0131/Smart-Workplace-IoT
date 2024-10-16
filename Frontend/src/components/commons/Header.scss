@@ -15,3 +15,31 @@ $light: #f8f9fa;
 .dropdown-toggle::after {
   display: none;
 }
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.7rem;
+  padding: 0.25em 0.4em;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  min-width: 300px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  background-color: white;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+
+.profile-image {
+  border-radius: 50%;
+}
