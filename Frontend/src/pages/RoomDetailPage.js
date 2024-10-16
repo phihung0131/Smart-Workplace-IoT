@@ -8,8 +8,9 @@ import Header from "../components/commons/Header";
 import Parameter from "../components/RoomDetail/Parameter";
 import Sidebar from "../components/commons/Sidebar";
 import Control from "../components/RoomDetail/Control";
+import RoomHistory from "../components/RoomDetail/RoomHistory";
 import "./RoomDetailPage.scss";
-// ssssss
+
 const RoomDetailPage = () => {
   const authState = useSelector((state) => state.auth);
   const { id } = useParams();
@@ -18,6 +19,7 @@ const RoomDetailPage = () => {
 
   const [isShowParameter, setIsShowParameter] = useState(true);
   const [isShowControl, setIsShowControl] = useState(false);
+  const [isShowHistory, setIsShowHistory] = useState(false);
 
   const [socket, setSocket] = useState(null);
   const [temperature, setTemperature] = useState(0);
@@ -28,6 +30,8 @@ const RoomDetailPage = () => {
   const [fan, setFan] = useState(false);
   const [pump, setPump] = useState(false);
   const [automode, setAutomode] = useState(false);
+
+  const [chartData, setChartData] = useState([]);
 
   const updateRoomSensors = useCallback(
     (sensorData) => {
@@ -43,6 +47,7 @@ const RoomDetailPage = () => {
           default:
             setHumidity(sensorData.sensor.value);
         }
+        setChartData(sensorData.sensor.latestSensorData);
       }
     },
     [id]
@@ -51,7 +56,7 @@ const RoomDetailPage = () => {
   const updateRoomDevide = useCallback(
     (deviceData) => {
       if (deviceData.device.room === id) {
-        console.log(deviceData);
+        // console.log(deviceData);
         switch (deviceData.device.type) {
           case "led":
             setLed(deviceData.device.activity === "ON" ? true : false);
@@ -102,11 +107,19 @@ const RoomDetailPage = () => {
   const handleParameterButton = () => {
     setIsShowParameter(true);
     setIsShowControl(false);
+    setIsShowHistory(false);
   };
 
   const handleControlButton = () => {
     setIsShowParameter(false);
     setIsShowControl(true);
+    setIsShowHistory(false);
+  };
+
+  const handleHistoryButton = () => {
+    setIsShowParameter(false);
+    setIsShowControl(false);
+    setIsShowHistory(true);
   };
 
   const fetchRoom = async (id) => {
@@ -124,8 +137,12 @@ const RoomDetailPage = () => {
 
   const fetchRoomData = async (id) => {
     try {
-      await apiService.getRoomData({ roomId: id });
-      // console.log(response);
+      const response = await apiService.getRoomData({ roomId: id });
+      const data = response?.data?.data?.roomData;
+      setFan(data.fan === "ON" ? true : false);
+      setLed(data.led === "ON" ? true : false);
+      setPump(data.pump === "ON" ? true : false);
+      setAutomode(data.autoMode === "ON" ? true : false);
     } catch (error) {
       console.log(error);
     }
@@ -144,6 +161,7 @@ const RoomDetailPage = () => {
         <Sidebar
           handleControlButton={handleControlButton}
           handleParameterButton={handleParameterButton}
+          handleHistoryButton={handleHistoryButton}
         />
 
         <div className="content w-100">
@@ -163,6 +181,7 @@ const RoomDetailPage = () => {
                 light={light}
                 temperature={temperature}
                 humidity={humidity}
+                chartData={chartData}
               />
             )}
             {isShowControl && (
@@ -175,8 +194,11 @@ const RoomDetailPage = () => {
                 setFan={setFan}
                 setLed={setLed}
                 setPump={setPump}
+                username={authState.username}
               />
             )}
+
+            {isShowHistory && <RoomHistory roomId={id} />}
           </Container>
         </div>
       </div>

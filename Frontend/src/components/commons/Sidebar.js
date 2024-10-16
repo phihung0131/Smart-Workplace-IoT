@@ -46,7 +46,11 @@ const Sidebar = (props) => {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link>
+          <Nav.Link
+            onClick={() => {
+              props.handleHistoryButton();
+            }}
+          >
             <FaHistory className="me-2" />
             Lịch sử
           </Nav.Link>

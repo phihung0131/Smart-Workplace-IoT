@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { FaFan, FaLightbulb, FaSprayCan, FaCog } from "react-icons/fa";
+import { showToast } from "../../helper/showToast";
 import apiService from "../../services/api";
 import "./Control.scss";
 
@@ -29,11 +30,16 @@ const ControlItem = (props) => {
       activity = "ON";
     }
     try {
-      await apiService.controlDevice({ roomId: id, device, activity });
+      await apiService.controlDevice({
+        roomId: id,
+        device,
+        activity,
+        username: props.username,
+      });
     } catch (error) {
-      console.error(">>>>>Loi:", error);
+      // console.error(">>>>>Loi:", error);
+      showToast.error(error?.response?.data?.message || "Lỗi hệ thống");
     }
-    // setState(!props.isOn);
   };
 
   return (
@@ -74,6 +80,7 @@ const Control = (props) => {
             label="Quạt"
             isOn={props.fan}
             setState={props.setFan}
+            username={props.username}
           />
         </Col>
         <Col xs={12} sm={6}>
@@ -82,6 +89,7 @@ const Control = (props) => {
             label="Đèn"
             isOn={props.led}
             setState={props.setLed}
+            username={props.username}
           />
         </Col>
         <Col xs={12} sm={6}>
@@ -90,6 +98,7 @@ const Control = (props) => {
             label="Máy tạo ẩm"
             isOn={props.pump}
             setState={props.setPump}
+            username={props.username}
           />
         </Col>
         <Col xs={12} sm={6}>
@@ -98,6 +107,7 @@ const Control = (props) => {
             label="Chế độ tự động"
             isOn={props.automode}
             setState={props.setAutomode}
+            username={props.username}
           />
         </Col>
       </Row>

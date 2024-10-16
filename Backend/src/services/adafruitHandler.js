@@ -3,26 +3,40 @@ const Room = require("../models/Room");
 const SensorData = require("../models/SensorData");
 const Device = require("../models/Device");
 const History = require("../models/History");
-const { notifyAllClients } = require("./socket");
+const RoomNotification = require("../models/RoomNotification");
+const User = require("../models/User");
+const { notifyAllClients, notifyUser } = require("./socket");
+const sensorDataObserver = require("../observers/sensorDataObserver");
+const AdafruitAdapter = require("../adapters/adafruitAdapter");
+const { getLatestSensorData } = require("../services/room");
 
+// Singleton Pattern: Đảm bảo chỉ có một instance của AdafruitHandler
 class AdafruitHandler {
-  constructor(adaName, adaKey) {
-    this.client = mqtt.connect("mqtts://io.adafruit.com", {
-      username: adaName,
-      password: adaKey,
-    });
-
-    this.client.on("connect", () => {
-      console.log("Connected to Adafruit IO");
-      this.subscribeToFeeds();
-    });
-
-    this.client.on("message", (topic, message) => {
-      this.handleMessage(topic, message);
-    });
+  constructor() {
+    this.adapters = new Map();
+    this.initialized = false;
   }
 
-  subscribeToFeeds() {
+  async initializeHandlers() {
+    if (this.initialized) {
+      console.log("AdafruitHandler đã được khởi tạo trước đó.");
+      return;
+    }
+
+    const rooms = await Room.find();
+    for (const room of rooms) {
+      // Adapter Pattern: Sử dụng AdafruitAdapter để kết nối với Adafruit IO
+      const adapter = new AdafruitAdapter(room.adaName, room.adaKey);
+      await adapter.connect();
+      this.adapters.set(room.adaName, adapter);
+      this.subscribeToFeeds(adapter, room);
+    }
+    this.initialized = true;
+    console.log("AdafruitHandler đã được khởi tạo thành công.");
+  }
+
+  // Đăng ký lắng nghe các feed từ Adafruit IO
+  subscribeToFeeds(adapter, room) {
     const feeds = [
       "auto_mode",
       "fan",
@@ -34,23 +48,17 @@ class AdafruitHandler {
       "user",
     ];
     feeds.forEach((feed) => {
-      this.client.subscribe(`${this.client.options.username}/feeds/${feed}`);
+      adapter.subscribe(feed, (message) =>
+        this.handleMessage(room, feed, message)
+      );
     });
   }
 
-  async handleMessage(topic, message) {
-    const feed = topic.split("/").pop();
+  // Xử lý tin nhắn nhận được từ Adafruit IO
+  async handleMessage(room, feed, message) {
     const value = message.toString();
 
     try {
-      const room = await Room.findOne({
-        adaName: this.client.options.username,
-      });
-      if (!room) {
-        console.log("Room not found");
-        return;
-      }
-
       switch (feed) {
         case "humidity":
         case "light":
@@ -68,53 +76,50 @@ class AdafruitHandler {
           break;
       }
     } catch (error) {
-      console.error("Error processing message:", error);
+      console.error("Lỗi xử lý tin nhắn:", error);
     }
   }
 
+  // Cập nhật dữ liệu cảm biến
   async updateSensorData(room, sensor, value) {
-    const update = {};
-    update[sensor] = value;
     const result = await SensorData.create({
       room: room._id,
       type: sensor,
       value,
     });
 
+    const latestSensorData = await getLatestSensorData(room._id);
+    // console.log(latestSensorData);
+
+    // Observer Pattern: Thông báo cho tất cả các observers về dữ liệu cảm biến mới
     notifyAllClients("room-sensors-update", {
-      sensor: result,
+      sensor: { ...result._doc, latestSensorData },
     });
-    // console.log(sensor);
-    // const result = await SensorData.findOneAndUpdate(
-    //   { room: room._id },
-    //   update,
-    //   {
-    //     upsert: true,
-    //     new: true,
-    //   }
-    // );
-    // // console.log(result);
+
+    sensorDataObserver.notify({
+      roomId: room._id,
+      sensor,
+      value,
+    });
   }
 
+  // Cập nhật trạng thái thiết bị
   async updateDeviceStatus(room, deviceType, status) {
     const result = await Device.findOneAndUpdate(
       { room: room._id, type: deviceType },
       { activity: status },
       { upsert: true, new: true }
     );
-    console.log(result);
-    notifyAllClients("room-device-update", {
-      device: result,
-    });
+    notifyAllClients("room-device-update", { device: result });
   }
 
+  // Cập nhật lịch sử sử dụng phòng
   async updateUserHistory(room, userInfo) {
     const regex = /(.+) được gán cho (.+) lúc (.+)/;
     const regexRevoke = /Thu hồi quyền điều khiển từ (.+) lúc (.+)/;
-    // console.log(userInfo);
     let match = userInfo.match(regex);
     if (match) {
-      const [, , username, timestamp] = match;
+      const [, , username] = match;
       await History.create({
         room: room._id,
         user: username,
@@ -122,15 +127,17 @@ class AdafruitHandler {
       });
       room.currentUser = username;
       await room.save();
+      this.startRoomUsageTimer(room._id, username);
     } else {
       match = userInfo.match(regexRevoke);
       if (match) {
-        const [, username, timestamp] = match;
+        const [, username] = match;
         await History.create({
           room: room._id,
           user: username,
           status: "out",
         });
+        this.stopRoomUsageTimer(room._id, username);
       } else if (userInfo === "none") {
         await History.create({
           room: room._id,
@@ -139,6 +146,7 @@ class AdafruitHandler {
         });
         room.currentUser = "none";
         await room.save();
+        this.stopRoomUsageTimer(room._id, room.currentUser);
       }
     }
 
@@ -147,69 +155,59 @@ class AdafruitHandler {
       currentUser: room.currentUser,
     });
   }
-}
 
-// Sử dụng
-async function initializeAdafruitHandlers() {
-  const rooms = await Room.find();
-  rooms.forEach((room) => {
-    new AdafruitHandler(room.adaName, room.adaKey);
-  });
-}
+  // Bắt đầu đếm thời gian sử dụng phòng
+  async startRoomUsageTimer(roomId, username) {
+    const user = await User.findOne({ username });
+    if (!user) return;
 
-// Public
-const controlRoomDevice = async (roomId, device, activity) => {
-  try {
-    // Tìm phòng dựa trên roomId
-    const room = await Room.findById(roomId);
-    if (!room) {
-      throw new Error("Room not found");
+    const notification = await RoomNotification.findOne({
+      room: roomId,
+      user: user._id,
+    });
+    if (!notification || !notification.isEnabled) return;
+
+    setTimeout(() => {
+      notifyUser(user._id, "room-usage-notification", {
+        message: `Bạn đã sử dụng phòng được ${notification.duration} phút.`,
+        roomId,
+      });
+    }, notification.duration * 60 * 1000);
+  }
+
+  // Dừng đếm thời gian sử dụng phòng
+  async stopRoomUsageTimer(roomId, username) {
+    // Implement logic to stop the timer if needed
+  }
+
+  // Điều khiển thiết bị trong phòng
+  async controlRoomDevice(roomId, device, activity) {
+    if (!this.initialized) {
+      await this.initializeHandlers();
     }
 
-    // Kết nối với Adafruit IO
-    const client = mqtt.connect("mqtts://io.adafruit.com", {
-      username: room.adaName, // Tên tài khoản Adafruit
-      password: room.adaKey, // Key từ Adafruit
-    });
+    try {
+      const room = await Room.findById(roomId);
+      if (!room) {
+        throw new Error("Không tìm thấy phòng");
+      }
 
-    return new Promise((resolve, reject) => {
-      client.on("connect", () => {
-        console.log("Connected to Adafruit IO");
+      const adapter = this.adapters.get(room.adaName);
+      if (!adapter) {
+        throw new Error("Không tìm thấy Adapter cho phòng này");
+      }
 
-        const feedName = `${room.adaName}/feeds/${device}`; // Định nghĩa tên feed dựa trên room và device
-        console.log(`Publishing to feed: ${feedName}`);
-
-        // Publish activity (on/off hoặc một giá trị khác) lên feed của thiết bị
-        client.publish(feedName, activity, (err) => {
-          if (err) {
-            console.error("Error publishing to Adafruit:", err);
-            client.end(); // Ngắt kết nối trong trường hợp lỗi
-            reject(err);
-          } else {
-            console.log(`Successfully published ${activity} to ${feedName}`);
-
-            // Ngắt kết nối sau khi publish xong
-            client.end(false, () => {
-              console.log("Disconnected from Adafruit IO");
-              resolve();
-            });
-          }
-        });
-      });
-
-      // Xử lý lỗi khi kết nối thất bại
-      client.on("error", (err) => {
-        console.error("MQTT connection error:", err);
-        client.end(); // Đảm bảo ngắt kết nối trong trường hợp có lỗi
-        reject(err);
-      });
-    });
-  } catch (error) {
-    console.error("Error controlling device:", error);
-    throw error; // Ném lỗi để xử lý phía trên nếu cần
+      await adapter.publish(device, activity);
+      console.log(
+        `Đã xuất bản thành công ${activity} đến ${device} cho phòng ${room.name}`
+      );
+    } catch (error) {
+      console.error("Lỗi điều khiển thiết bị:", error);
+      throw error;
+    }
   }
-};
+}
 
-// initializeAdafruitHandlers().catch(console.error);
-
-module.exports = { initializeAdafruitHandlers, controlRoomDevice };
+// Singleton Pattern: Tạo và xuất một instance duy nhất của AdafruitHandler
+const adafruitHandlerInstance = new AdafruitHandler();
+module.exports = adafruitHandlerInstance;

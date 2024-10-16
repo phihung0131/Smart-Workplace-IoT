@@ -12,5 +12,20 @@ router.post("/room/device", [verifyToken], roomController.controlDevice);
 
 router.post("/roomdata", [verifyToken], roomController.getRoomData);
 
+router.post(
+  "/room/notification",
+  [verifyToken],
+  roomController.setRoomNotification
+);
+
+// API lấy lịch sử sử dụng phòng
+router.post(
+  "/room/history",
+  [verifyToken],
+  roomController.getRoomUsageHistory
+  // (req, res) => {
+  //   res.send("Hello");
+  // }
+);
 
 module.exports = router;

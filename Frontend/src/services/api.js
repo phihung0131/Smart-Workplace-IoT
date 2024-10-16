@@ -10,11 +10,13 @@ export const apiService = {
   getRooms: () => axiosInstance.get("/rooms"),
   getRoomData: (roomId) =>
     axiosInstance.post("/roomdata", JSON.stringify(roomId)),
-  controlDevice: (roomId, device, activity) =>
+  controlDevice: (roomId, device, activity, username) =>
     axiosInstance.post(
       "/room/device",
-      JSON.stringify(roomId, device, activity)
+      JSON.stringify(roomId, device, activity, username)
     ),
+  getRoomHistory: (roomId) =>
+    axiosInstance.post("/room/history", JSON.stringify({ roomId: roomId })),
 };
 
 export default apiService;

@@ -3,12 +3,10 @@ const http = require("http");
 const cors = require("cors");
 require("dotenv").config();
 const dbConnection = require("./src/config/database");
-const {
-  initializeAdafruitHandlers,
-} = require("./src/services/adafruitHandler");
+const adafruitHandler = require("./src/services/adafruitHandler");
 const routes = require("./src/routes");
 const passport = require("./src/config/passport");
-const { setupSocket } = require("./src/services/socket.js"); // Import setupSocket
+const { setupSocket } = require("./src/services/socket.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -16,35 +14,39 @@ const server = http.createServer(app);
 const hostname = process.env.HOSTNAME;
 const port = process.env.PORT || 8081;
 
-// Middleware: Enable CORS for specified origin
+// Middleware: Enable CORS
 let corsOptions = {
   origin: "*",
   credentials: true,
 };
-
 app.use(cors(corsOptions));
 
 // Thiết lập Socket.IO
-setupSocket(server); // Khởi tạo io từ server
+setupSocket(server);
 
-// Middleware: Parse requests with JSON payload
+// Middleware: Parse JSON và URL-encoded requests
 app.use(express.json());
-
-// Middleware: Parse requests with x-www-form-urlencoded content type
 app.use(express.urlencoded({ extended: true }));
 
+// Khởi tạo Passport
 app.use(passport.initialize());
 
 // Routes
 app.use("/api/v1", routes);
 
-// Connect to the database
-dbConnection.connect();
-
-// Kết nối adafruit
-initializeAdafruitHandlers();
-
-// Start the server
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+// Kết nối database và khởi động server
+dbConnection.connect().then(async () => {
+  try {
+    // Singleton Pattern: Sử dụng instance duy nhất của AdafruitHandler
+    await adafruitHandler.initializeHandlers();
+    server.listen(port, hostname, () => {
+      console.log(`Server đang chạy tại http://${hostname}:${port}/`);
+    });
+  } catch (error) {
+    console.error("Lỗi khởi tạo AdafruitHandler:", error);
+    process.exit(1);
+  }
+}).catch(error => {
+  console.error("Lỗi kết nối cơ sở dữ liệu:", error);
+  process.exit(1);
 });

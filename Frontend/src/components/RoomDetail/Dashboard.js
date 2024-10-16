@@ -48,7 +48,7 @@ const Dashboard = ({ chartData }) => {
               dataKey="light"
               stroke="#00ff00"
               activeDot={{ r: 8 }}
-              name="Ánh sáng"
+              name="Ánh sáng/10"
             />
           </LineChart>
         </ResponsiveContainer>
