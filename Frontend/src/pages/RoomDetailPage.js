@@ -9,7 +9,7 @@ import Parameter from "../components/RoomDetail/Parameter";
 import Sidebar from "../components/commons/Sidebar";
 import Control from "../components/RoomDetail/Control";
 import "./RoomDetailPage.scss";
-
+// ssssss
 const RoomDetailPage = () => {
   const authState = useSelector((state) => state.auth);
   const { id } = useParams();
