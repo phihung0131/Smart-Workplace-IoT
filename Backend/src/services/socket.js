@@ -43,7 +43,7 @@ const notifyAllClients = (emit, data) => {
 };
 
 const notifyUser = (userId, event, data) => {
-  const userSocket = userSockets.get(userId);
+  const userSocket = userSockets.get(userId + "v2");
   if (userSocket) {
     userSocket.emit(event, data);
   } else {

@@ -17,6 +17,11 @@ export const apiService = {
     ),
   getRoomHistory: (roomId) =>
     axiosInstance.post("/room/history", JSON.stringify({ roomId: roomId })),
+  setNotification: (isEnabled, duration = 0) =>
+    axiosInstance.post(
+      "/room/notification",
+      JSON.stringify({ isEnabled: isEnabled, duration: duration })
+    ),
 };
 
 export default apiService;

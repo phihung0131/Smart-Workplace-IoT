@@ -1,7 +1,7 @@
 from modules.adafruit_client import AdafruitClient
-from modules.simulated_sensors import SimulatedSensors
+from modules.simulated_sensors import SimulatedSensors # Sửa => lấy uart
 from modules.voice_assistant import VoiceAssistant
-from modules.environment_controller2 import EnvironmentController
+from modules.environment_controller2 import EnvironmentController # Sửa => lấy environment_controller
 from modules.camera_handler import CameraHandler
 from config import CONFIG
 import time

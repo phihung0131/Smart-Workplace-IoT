@@ -111,7 +111,6 @@ const roomController = {
     try {
       const { roomId, device, activity, username } = req.body;
 
-      console.log(roomId, device, activity, username);
       const room = await Room.findById(roomId);
       if (room.currentUser !== username) {
         return sendResponse(res, 403, "Không có quyền điều khiển phòng");
@@ -128,11 +127,10 @@ const roomController = {
   // Cài đặt thông báo sử dụng phòng
   setRoomNotification: async (req, res) => {
     try {
-      const { roomId, duration, isEnabled } = req.body;
+      const { duration, isEnabled } = req.body;
       const userId = req.user._id;
 
       let notification = await RoomNotification.findOne({
-        room: roomId,
         user: userId,
       });
       if (notification) {
@@ -141,14 +139,13 @@ const roomController = {
         await notification.save();
       } else {
         notification = new RoomNotification({
-          room: roomId,
           user: userId,
           duration,
           isEnabled,
         });
         await notification.save();
       }
-
+      console.log(notification);
       sendResponse(res, 200, "Cài đặt thông báo thành công", notification);
     } catch (err) {
       console.error("Lỗi cài đặt thông báo phòng:", err);

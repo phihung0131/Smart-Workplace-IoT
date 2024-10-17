@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import io from "socket.io-client";
 import {
   Navbar,
   Nav,
@@ -9,12 +11,11 @@ import {
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell, Gear } from "react-bootstrap-icons";
-import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/actions/authAction";
 import NotificationPanel from "./NotificationPanel";
 import NotificationSettings from "./NotificationSettings";
-import { toast } from "react-toastify";
-import io from "socket.io-client";
+import showToast from "../../helper/showToast";
+
 import "./Header.scss";
 
 const Header = () => {
@@ -22,51 +23,63 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [notificationSettings, setNotificationSettings] = useState({
-    enabled: true,
-    interval: 5,
-  });
   const [socket, setSocket] = useState(null);
+  const [notifications, setNotification] = useState([]);
+
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [duration, setDuration] = useState(15);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (authState.isAuthenticated) {
-      const newSocket = io(process.env.REACT_APP_BACKEND_HOST);
-      setSocket(newSocket);
+    // Kết nối tới server Socket.IO
+    const newSocket = io(process.env.REACT_APP_BACKEND_HOST);
+    setSocket(newSocket);
 
-      return () => newSocket.close();
-    }
-  }, [authState.isAuthenticated]);
+    newSocket.on("connect", () => {
+      console.log("Socket connected!");
+      newSocket.emit("subscribe", { userId: authState.username + "v2" });
+    });
+
+    setSocket(newSocket);
+
+    // Cleanup function
+    return () => newSocket.close();
+  }, [authState.username]);
 
   useEffect(() => {
-    if (socket) {
-      socket.on("notification", handleNotification);
+    if (!socket) return;
 
-      return () => {
-        socket.off("notification", handleNotification);
-      };
-    }
+    // Lắng nghe updates từ server
+    socket.on("room-usage-notification", handleNotification);
+
+    return () => {
+      socket.off("room-usage-notification", handleNotification);
+    };
   }, [socket]);
 
   const handleNotification = (data) => {
-    if (notificationSettings.enabled) {
-      playNotificationSound();
-      toast.info(data.message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
+    playNotificationSound();
+    showToast.info(data.message);
+
+    let newNoti = {
+      content: data.message,
+      title: "Thông báo thời gian dùng phòng",
+      time: new Date().toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
+    };
+
+    setNotification((prev) => [newNoti, ...prev]);
   };
 
   const playNotificationSound = () => {
-    const audio = new Audio("/path/to/notification-sound.mp3");
-    audio.play();
+    const audio = new Audio("/sound.mp3");
+
+    audio.play().catch((error) => {});
   };
 
   const handleLogoutClick = () => {
@@ -79,54 +92,6 @@ const Header = () => {
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
-
-  const handleSaveSettings = (settings) => {
-    setNotificationSettings(settings);
-    setShowSettings(false);
-    // Gửi cài đặt mới đến server
-    if (socket) {
-      socket.emit("updateNotificationSettings", settings);
-    }
-  };
-
-  // Mảng thông báo mẫu (sau này có thể lấy từ API hoặc Redux store)
-  const notifications = [
-    {
-      title: "Thông báo 1",
-      content: "Nội dung thông báo 1",
-      time: "5 phút trước",
-    },
-    {
-      title: "Thông báo 1",
-      content: "Nội dung thông báo 1",
-      time: "5 phút trước",
-    },
-    {
-      title: "Thông báo 1",
-      content: "Nội dung thông báo 1",
-      time: "5 phút trước",
-    },
-    {
-      title: "Thông báo 1",
-      content: "Nội dung thông báo 1",
-      time: "5 phút trước",
-    },
-    {
-      title: "Thông báo 1",
-      content: "Nội dung thông báo 1",
-      time: "5 phút trước",
-    },
-    {
-      title: "Thông báo 2",
-      content: "Nội dung thông báo 2",
-      time: "1 giờ trước",
-    },
-    {
-      title: "Thông báo 3",
-      content: "Nội dung thông báo 3",
-      time: "1 ngày trước",
-    },
-  ];
 
   if (!authState.isAuthenticated) {
     return (
@@ -176,7 +141,7 @@ const Header = () => {
               >
                 <Bell size={20} className="text-secondary" />
                 <Badge bg="danger" className="notification-badge">
-                  3
+                  {notifications.length}
                 </Badge>
               </Nav.Link>
               {showNotifications && (
@@ -219,9 +184,10 @@ const Header = () => {
         </Modal.Header>
         <Modal.Body>
           <NotificationSettings
-            isEnabled={notificationSettings.enabled}
-            interval={notificationSettings.interval}
-            onSave={handleSaveSettings}
+            isEnabled={isEnabled}
+            setIsEnabled={setIsEnabled}
+            duration={duration}
+            setDuration={setDuration}
           />
         </Modal.Body>
       </Modal>

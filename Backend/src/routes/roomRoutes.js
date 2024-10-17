@@ -23,9 +23,6 @@ router.post(
   "/room/history",
   [verifyToken],
   roomController.getRoomUsageHistory
-  // (req, res) => {
-  //   res.send("Hello");
-  // }
 );
 
 module.exports = router;

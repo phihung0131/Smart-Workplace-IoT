@@ -15,6 +15,7 @@ class AdafruitHandler {
   constructor() {
     this.adapters = new Map();
     this.initialized = false;
+    this.userTimers = new Map();
   }
 
   async initializeHandlers() {
@@ -127,7 +128,7 @@ class AdafruitHandler {
       });
       room.currentUser = username;
       await room.save();
-      this.startRoomUsageTimer(room._id, username);
+      this.startRoomUsageTimer(username);
     } else {
       match = userInfo.match(regexRevoke);
       if (match) {
@@ -157,27 +158,62 @@ class AdafruitHandler {
   }
 
   // Bắt đầu đếm thời gian sử dụng phòng
-  async startRoomUsageTimer(roomId, username) {
+  async startRoomUsageTimer(username) {
     const user = await User.findOne({ username });
     if (!user) return;
 
-    const notification = await RoomNotification.findOne({
-      room: roomId,
+    const checkAndNotify = async () => {
+      const notification = await RoomNotification.findOne({
+        user: user._id,
+      });
+      if (!notification) return;
+
+      const latestHistory = await History.findOne().sort({ createdAt: -1 });
+
+      if (
+        latestHistory &&
+        latestHistory.status === "in" &&
+        latestHistory.user === username
+      ) {
+        if (notification.isEnabled) {
+          notifyUser(username, "room-usage-notification", {
+            message: `Bạn đã sử dụng phòng được ${notification.duration} phút.`,
+          });
+        }
+
+        // Cập nhật interval với duration mới
+        clearTimeout(this.userTimers.get(username));
+        const newIntervalId = setTimeout(
+          checkAndNotify,
+          notification.isEnabled ? notification.duration * 60 * 1000 : 1000 * 60
+        );
+        this.userTimers.set(username, newIntervalId);
+      } else {
+        clearTimeout(this.userTimers.get(username));
+        console.log("clearTimeout", username);
+        this.userTimers.delete(username);
+      }
+    };
+
+    // Bắt đầu timer đầu tiên
+    const initialNotification = await RoomNotification.findOne({
       user: user._id,
     });
-    if (!notification || !notification.isEnabled) return;
-
-    setTimeout(() => {
-      notifyUser(user._id, "room-usage-notification", {
-        message: `Bạn đã sử dụng phòng được ${notification.duration} phút.`,
-        roomId,
-      });
-    }, notification.duration * 60 * 1000);
+    if (initialNotification && initialNotification.isEnabled) {
+      const initialIntervalId = setTimeout(
+        checkAndNotify,
+        initialNotification.duration * 60 * 1000
+      );
+      this.userTimers.set(username, initialIntervalId);
+    }
   }
 
   // Dừng đếm thời gian sử dụng phòng
   async stopRoomUsageTimer(roomId, username) {
-    // Implement logic to stop the timer if needed
+    if (this.userTimers && this.userTimers.has(username)) {
+      clearTimeout(this.userTimers.get(username));
+      this.userTimers.delete(username);
+    }
   }
 
   // Điều khiển thiết bị trong phòng

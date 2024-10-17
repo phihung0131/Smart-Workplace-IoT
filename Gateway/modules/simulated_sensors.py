@@ -15,13 +15,6 @@ class SimulatedSensors:
         self.humidity += random.uniform(-2, 2)      # Độ ẩm dao động từ -2 đến 2
         self.light += random.uniform(-20, 20)       # Ánh sáng dao động từ -20 đến 20
 
-
-        # return {
-        #     'temperature': round(self.temperature, 1),
-        #     'humidity': round(self.humidity, 1),
-        #     'light': round(self.light, 1)
-        # }
-
         return {
             'temperature': round(self.temperature, 1),
             'humidity': round(self.humidity, 1),

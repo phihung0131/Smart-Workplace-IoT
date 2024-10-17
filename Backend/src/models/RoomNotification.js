@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const RoomNotificationSchema = new mongoose.Schema(
   {
-    room: { type: mongoose.Schema.Types.ObjectId, ref: "Room" },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     duration: Number, // Thời gian sử dụng phòng (phút)
     isEnabled: { type: Boolean, default: true },
