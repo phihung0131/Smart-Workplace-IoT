@@ -31,6 +31,11 @@ class SimulatedSensors:
         self.fan_state = state
         print(f"[MẠCH] Quạt đã được {'bật' if state else 'tắt'}")
 
+    def control_pump(self, state):
+        # Điều khiển trạng thái bơm nước
+        self.pump_state = state
+        print(f"[MẠCH] Bơm nước đã được {'bật' if state else 'tắt'}")
+
     def control_all(self, mode_state):
         # Điều khiển tất cả các thiết bị dựa trên trạng thái chế độ
         for key, value in mode_state.items():
@@ -38,4 +43,6 @@ class SimulatedSensors:
                 self.control_led(1 if value == 'ON' else 0)
             if key == 'fan':
                 self.control_fan(1 if value == 'ON' else 0)
+            if key == 'pump':
+                self.control_pump(1 if value == 'ON' else 0)
 

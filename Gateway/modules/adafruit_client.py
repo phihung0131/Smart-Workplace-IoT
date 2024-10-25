@@ -34,6 +34,7 @@ class AdafruitClient:
         feed_mode = {
             'fan': 'OFF',
             'led': 'OFF',
+            'pump': 'OFF',
             'auto_mode': 'OFF'
         }
 
