@@ -50,7 +50,17 @@ class AdafruitClient:
         # Callback khi nhận được tin nhắn từ Adafruit IO
         print(f"Nhận được dữ liệu từ {feed_id}: {payload}")
         self.latest_data[feed_id] = payload
-        self.simulated_sensors.control_all(self.latest_data)
+        # self.simulated_sensors.control_all(self.latest_data)
+        control = 1 if payload == 'ON' else 0
+        if feed_id == 'led':
+            self.simulated_sensors.control_led(control)
+            time.sleep(0.1)
+        elif feed_id == 'fan':
+            self.simulated_sensors.control_fan(control)
+            time.sleep(0.1)
+        elif feed_id == 'pump':
+            self.simulated_sensors.control_pump(control)
+            time.sleep(0.1)
 
     def on_disconnect(self, client):
         # Callback khi ngắt kết nối khỏi Adafruit IO
@@ -60,7 +70,7 @@ class AdafruitClient:
         # Đăng tải dữ liệu lên feed Adafruit IO
         try:
             self.client.publish(feed, str(value))
-            print(f"Đã gửi dữ liệu lên feed {feed}: {value}")
+            # print(f"Đã gửi dữ liệu lên feed {feed}: {value}")
         except Exception as e:
             print(f"Lỗi khi gửi dữ liệu lên feed {feed}: {e}")
 

@@ -50,6 +50,7 @@ class UARTHandler:
             while('!' in self.message and '#' in self.message):
                 start = self.message.find('!')
                 end = self.message.find('#')
+                # print(self.message[start:end+1])
                 self.process_data(self.message[start:end+1])
                 self.message = self.message[end+1:]
 
@@ -66,7 +67,6 @@ class UARTHandler:
         print(f"[MẠCH] Đèn LED đã được {'bật' if state else 'tắt'}")
         # Điều khiển đèn LED thông qua UART
         command = f"L{state}" #L1 => Bật đèn, L0 => Tắt đèn
-        print(command)
         self.uart.write(command.encode())
 
     def control_fan(self, state):
@@ -85,26 +85,18 @@ class UARTHandler:
         command = f"P{state}" #P1 => Bật bơm, P0 => Tắt bơm
         self.uart.write(command.encode())
 
-    def control_all(self, mode_state):
-        # Điều khiển tất cả các thiết bị dựa trên trạng thái chế độ
-        for key, value in mode_state.items():
-            if key == 'led':
-                self.control_led(1 if value == 'ON' else 0)
-            # if key == 'fan':
-            #     self.control_fan(1 if value == 'ON' else 0)
-            # if key == 'pump':
-            #     self.control_pump(1 if value == 'ON' else 0)
+    # def control_all(self, mode_state):
+    #     # Điều khiển tất cả các thiết bị dựa trên trạng thái chế độ
+    #     for key, value in mode_state.items():
+    #         if key == 'led':
+    #             self.control_led(1 if value == 'ON' else 0)
+    #         if key == 'fan':
+    #             self.control_fan(1 if value == 'ON' else 0)
+    #         if key == 'pump':
+    #             self.control_pump(1 if value == 'ON' else 0)
     
 
-#     def control_led(self, state):
-#         # Điều khiển đèn LED thông qua UART
-#         command = f"LED,{state}\n"
-#         self.uart.write(command.encode())
 
-#     def control_fan(self, state):
-#         # Điều khiển quạt thông qua UART
-#         command = f"FAN,{state}\n"
-#         self.uart.write(command.encode())
         
 if __name__ == "__main__":
     print("---------------------------")
@@ -112,8 +104,8 @@ if __name__ == "__main__":
     # uart.control_led(0)
     # time.sleep(2)
 
-    last_led_state = {'pump': 'OFF', 'fan': 'OFF', 'auto_mode': 'OFF', 'led': 'ON'}
-    uart.control_all(last_led_state)
+#     last_led_state = {'pump': 'OFF', 'fan': 'OFF', 'auto_mode': 'OFF', 'led': 'ON'}
+#     uart.control_all(last_led_state)
     while True :
         uart.read_sensors()
         time.sleep(5)
