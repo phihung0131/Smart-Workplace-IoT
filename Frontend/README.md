@@ -1,70 +1,96 @@
-# Getting Started with Create React App
+# 🌐 SmartWork Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend application for the SmartWork IoT workspace management system built with React.
 
-## Available Scripts
+## ✨ Features
 
-In the project directory, you can run:
+- 🔑 User authentication (login/register)
+- 🏢 Room management and monitoring
+- 📊 Real-time sensor data visualization
+- 🎛️ Device control interface
+- 📈 Room usage history tracking
+- 🔔 User notifications system
+- 📱 Responsive design
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **React** - Frontend framework
+- **Redux** - State management
+- **Redux Persist** - State persistence
+- **React Router** - Navigation
+- **React Bootstrap** - UI components
+- **Socket.IO Client** - Real-time communication
+- **Axios** - HTTP client
+- **Recharts** - Data visualization
+- **SASS** - Styling
+- **React Toastify** - Notifications
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 📁 Project Structure
 
-### `npm test`
+```
+frontend/
+├── public/                # Static files
+├── src/
+│   ├── axios/            # Axios config & interceptors
+│   ├── components/        # Reusable components
+│   │   ├── commons/       # Common components (Header, Sidebar, etc.)
+│   │   ├── RoomDetail/    # Room detail components
+│   │   └── RoomList/      # Room list components
+│   ├── helper/            # Helper functions
+│   ├── pages/             # Page components
+│   ├── redux/             # Redux store, actions & reducers
+│   ├── services/          # API services
+│   └── App.js             # Root component
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📝 Setup Instructions
 
-### `npm run build`
+1. Install dependencies:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Configure environment variables in `.env`:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```
+   REACT_APP_API_URL=http://localhost:8080/api/v1
+   REACT_APP_BACKEND_HOST=http://localhost:8080
+   ```
 
-### `npm run eject`
+3. Start the development server:
+   ```bash
+   npm start
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 📜 Available Scripts
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- `npm start` - Run development server
+- `npm build` - Build production bundle
+- `npm test` - Run tests
+- `npm eject` - Eject from Create React App
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🏗️ Main Components
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Pages
 
-## Learn More
+- **HomePage** - Landing page with feature overview
+- **LoginPage** - User login form
+- **RegisterPage** - User registration form
+- **RoomListPage** - List of available rooms
+- **RoomDetailPage** - Room monitoring and control interface
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Features
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Room Control** - Control room devices (lights, fans, etc.)
+- **Parameter Dashboard** - Real-time sensor data visualization
+- **Room History** - Track room usage history
+- **Notifications** - Real-time alerts and notifications
 
-### Code Splitting
+## 📊 State Management
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Redux store with the following slices:
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **auth** - Authentication state
+- **room** - Room data & status
+- **notification** - User notifications
