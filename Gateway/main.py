@@ -1,74 +1,86 @@
 from modules.adafruit_client import AdafruitClient
+# from modules.simulated_sensors import SimulatedSensors # Sửa => lấy uart
 from modules.uart_handler import UARTHandler
-from modules.camera_handler import CameraHandler
-from modules.pose_detector import PoseDetector
 from modules.voice_assistant import VoiceAssistant
-from modules.environment_controller import EnvironmentController
+from modules.environment_controller2 import EnvironmentController 
+from modules.camera_handler import CameraHandler
 from config import CONFIG
 import time
+import threading
 
+from modules.websocket_handler import HTTPHandler 
+import asyncio
+
+# Lớp Gateway chính để quản lý toàn bộ hệ thống
 class Gateway:
     def __init__(self):
-        self.adafruit_client = AdafruitClient(CONFIG)
-        self.uart_handler = UARTHandler(CONFIG)
-        self.camera_handler = CameraHandler()
-        self.pose_detector = PoseDetector(CONFIG['MODEL_PATH'])
-        self.voice_assistant = VoiceAssistant()
-        self.environment_controller = EnvironmentController(self.uart_handler)
-        self.auto_mode = False
-        self.work_start_time = None
+        self.simulated_sensors = UARTHandler()
+        # self.simulated_sensors = SimulatedSensors() # data fake
+        self.adafruit_client = AdafruitClient(CONFIG, self.simulated_sensors)
+        self.environment_controller = EnvironmentController(self.adafruit_client, self.simulated_sensors)
+        self.voice_assistant = VoiceAssistant(CONFIG, self.adafruit_client, self.environment_controller)
+        self.camera_handler = CameraHandler(self.adafruit_client)
+        self.websocket_handler = HTTPHandler(self.camera_handler)  
+
+    def run_websocket(self):
+        # Chạy websocket server
+        asyncio.run(self.websocket_handler.start())
+
+    def run_sensor_data(self):
+        # Chạy vòng lặp cập nhật dữ liệu cảm biến
+        time.sleep(20)
+
+        while True:
+            # sensor_data = self.simulated_sensors.read_sensors() #Chạy test data fake
+            self.simulated_sensors.read_sensors()
+            sensor_data = self.simulated_sensors.get_sensor_data()
+            self.adafruit_client.publish_sensor_data(sensor_data)           
+
+            latest_data = self.adafruit_client.get_latest_data()
+            # print(latest_data)
+            if 'auto_mode' in latest_data and latest_data['auto_mode'] == 'ON':
+                self.environment_controller.adjust()
+
+            time.sleep(10)
+
+    def run_voice_assistant(self):
+        # Chạy trợ lý giọng nói
+        time.sleep(20)
+        while True:
+            self.voice_assistant.run()
+
+    def run_camera_handler(self):
+        # Chạy xử lý camera
+        time.sleep(20)
+        self.camera_handler.run()
 
     def run(self):
+        # Khởi chạy toàn bộ hệ thống
+        # Kết nối tới Adafruit IO
         self.adafruit_client.connect()
-        while True:
-            # Đọc dữ liệu cảm biến
-            sensor_data = self.uart_handler.read_sensors()
-            self.adafruit_client.publish_sensor_data(sensor_data)
 
-            # Xử lý input từ camera
-            frame = self.camera_handler.get_frame()
-            if frame is not None:
-                presence = self.camera_handler.detect_presence(frame)
-                self.adafruit_client.publish('presence', int(presence))
+        # Chờ một chút để xem các tin nhắn nhận được (nếu có)
+        time.sleep(5)
 
-                if presence:
-                    pose = self.pose_detector.detect_pose(frame)
-                    self.adafruit_client.publish('posture', pose)
+        # Tạo các luồng cho dữ liệu cảm biến, trợ lý giọng nói và xử lý camera
+        thread1 = threading.Thread(target=self.run_sensor_data)
+        thread2 = threading.Thread(target=self.run_voice_assistant)
+        thread3 = threading.Thread(target=self.run_camera_handler)
+        thread4 = threading.Thread(target=self.run_websocket)
 
-                    # Theo dõi thời gian làm việc
-                    if self.work_start_time is None:
-                        self.work_start_time = time.time()
-                else:
-                    if self.work_start_time is not None:
-                        work_duration = int(time.time() - self.work_start_time)
-                        self.adafruit_client.publish('work_duration', work_duration)
-                        self.work_start_time = None
+        # Khởi động các luồng
+        thread1.start()
+        thread2.start()
+        thread3.start()
+        thread4.start()
 
-            # Xử lý lệnh giọng nói
-            command = self.voice_assistant.listen_for_command()
-            if command:
-                self.process_voice_command(command)
-
-            # Điều chỉnh môi trường nếu chế độ tự động được bật
-            if self.auto_mode:
-                self.environment_controller.adjust(sensor_data)
-
-            time.sleep(1)
-
-    def process_voice_command(self, command):
-        if "bật đèn" in command:
-            self.environment_controller.control_led(1)
-        elif "tắt đèn" in command:
-            self.environment_controller.control_led(0)
-        elif "bật quạt" in command:
-            self.environment_controller.control_fan(1)
-        elif "tắt quạt" in command:
-            self.environment_controller.control_fan(0)
-        elif "bật chế độ tự động" in command:
-            self.auto_mode = True
-        elif "tắt chế độ tự động" in command:
-            self.auto_mode = False
+        # Chờ cho tất cả các luồng hoàn thành
+        thread1.join()
+        thread2.join() 
+        thread3.join() 
+        thread4.join()
 
 if __name__ == "__main__":
+    print("---------------------------")
     gateway = Gateway()
     gateway.run()

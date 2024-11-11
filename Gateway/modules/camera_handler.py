@@ -32,6 +32,7 @@ class CameraHandler:
 
     def load_known_faces(self):
         # Tải các embedding khuôn mặt đã biết từ file hoặc tính toán chúng
+        self.known_embeddings = {}  # Clear existing embeddings
         serialized_file = 'known_faces_embeddings.pkl'
         if os.path.exists(serialized_file):
             print("Đang tải dữ liệu khuôn mặt đã serialized...")
