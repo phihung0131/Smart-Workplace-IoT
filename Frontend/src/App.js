@@ -10,6 +10,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/commons/Protective";
 import RoomListPage from "./pages/RoomListPage";
 import RoomDetailPage from "./pages/RoomDetailPage";
+import AddUserPage from './pages/AddUserPage';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/add-user" element={<AddUserPage />} />
         </Routes>
       </Router>
     </>

@@ -89,6 +89,10 @@ const Header = () => {
     }, 1000);
   };
 
+  const handleAddUserClick = () => {
+    navigate("/add-user");
+  };
+
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
@@ -170,6 +174,9 @@ const Header = () => {
               }
               id="profile-dropdown"
             >
+              <NavDropdown.Item onClick={() => handleAddUserClick()}>
+                Thêm dữ liệu khuân mặt
+              </NavDropdown.Item>
               <NavDropdown.Item onClick={() => handleLogoutClick()}>
                 Đăng xuất
               </NavDropdown.Item>
