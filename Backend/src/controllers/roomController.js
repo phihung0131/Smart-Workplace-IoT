@@ -14,11 +14,11 @@ const roomController = {
   // Thêm phòng mới cho người dùng
   addRoom: async (req, res) => {
     try {
-      const { adaName, adaKey } = req.body;
-      const room = await Room.findOne({ adaName, adaKey });
+      const { roomId, password } = req.body;
+      const room = await Room.findOne({ _id: roomId, password });
 
       if (!room) {
-        return sendResponse(res, 404, "Adafruit name/key không đúng");
+        return sendResponse(res, 404, "ID phòng hoặc mật khẩu không đúng không đúng");
       }
 
       const userRoom = await UserRoom.findOne({

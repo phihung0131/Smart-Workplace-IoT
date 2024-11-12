@@ -5,8 +5,8 @@ import apiService from "../../services/api";
 
 const AddRoomModal = ({ show, onHide }) => {
   const [roomData, setRoomData] = useState({
-    adaName: "",
-    adaKey: "",
+    roomId: "",
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -36,8 +36,8 @@ const AddRoomModal = ({ show, onHide }) => {
     fetchAddRoom(roomData);
 
     setRoomData({
-      adaName: "",
-      adaKey: "",
+      roomId: "",
+      password: "",
     });
 
     onHide();
@@ -51,21 +51,21 @@ const AddRoomModal = ({ show, onHide }) => {
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Adafruit Name</Form.Label>
+            <Form.Label>Room ID</Form.Label>
             <Form.Control
               type="text"
-              name="adaName"
-              value={roomData.adaName}
+              name="roomId"
+              value={roomData.roomId}
               onChange={handleChange}
               required
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Adafruit Key</Form.Label>
+            <Form.Label>Password</Form.Label>
             <Form.Control
-              type="text"
-              name="adaKey"
-              value={roomData.adaKey}
+              type="password"
+              name="password"
+              value={roomData.password}
               onChange={handleChange}
               required
             />

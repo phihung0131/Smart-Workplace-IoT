@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const RoomSchema = new mongoose.Schema(
   {
     name: String,
+    password: String,
     adaName: String,
     adaKey: String,
     currentUser: String,
