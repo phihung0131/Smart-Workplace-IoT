@@ -25,8 +25,8 @@ app.use(cors(corsOptions));
 setupSocket(server);
 
 // Middleware: Parse JSON và URL-encoded requests
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100mb' })); 
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Khởi tạo Passport
 app.use(passport.initialize());
@@ -35,18 +35,21 @@ app.use(passport.initialize());
 app.use("/api/v1", routes);
 
 // Kết nối database và khởi động server
-dbConnection.connect().then(async () => {
-  try {
-    // Singleton Pattern: Sử dụng instance duy nhất của AdafruitHandler
-    await adafruitHandler.initializeHandlers();
-    server.listen(port, hostname, () => {
-      console.log(`Server đang chạy tại http://${hostname}:${port}/`);
-    });
-  } catch (error) {
-    console.error("Lỗi khởi tạo AdafruitHandler:", error);
+dbConnection
+  .connect()
+  .then(async () => {
+    try {
+      // Singleton Pattern: Sử dụng instance duy nhất của AdafruitHandler
+      await adafruitHandler.initializeHandlers();
+      server.listen(port, hostname, () => {
+        console.log(`Server đang chạy tại http://${hostname}:${port}/`);
+      });
+    } catch (error) {
+      console.error("Lỗi khởi tạo AdafruitHandler:", error);
+      process.exit(1);
+    }
+  })
+  .catch((error) => {
+    console.error("Lỗi kết nối cơ sở dữ liệu:", error);
     process.exit(1);
-  }
-}).catch(error => {
-  console.error("Lỗi kết nối cơ sở dữ liệu:", error);
-  process.exit(1);
-});
+  });

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import showToast from "../helper/showToast";
-import axiosInstance from "../axios/axios";
+import axios from "axios";
 import Header from "../components/commons/Header";
 
 const AddUserPage = () => {
@@ -39,16 +39,32 @@ const AddUserPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post("/users", {
-        username,
-        images,
-      });
+      const response = await axios.post(
+        "http://localhost:8765",
+        {
+          type: "add_user",
+          username: username,
+          images: images,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      showToast.success("User added successfully");
+      if (response.data.status === "success") {
+        alert("User added successfully");
+      } else {
+        alert("Error: " + response.data.message);
+      }
+
+      // showToast.success("User added successfully");
       setUsername("");
       setImages([]);
     } catch (error) {
-      showToast.error(error?.response?.data?.message || "Error adding user");
+      // showToast.error(error?.response?.data?.message || "Error adding user");
+      alert('Error: ' + error.message);
     } finally {
       setIsLoading(false);
     }
